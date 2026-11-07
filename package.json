@@ -1,0 +1,8 @@
+{
+  "name": "promemoria-arrivi",
+  "private": true,
+  "type": "module",
+  "description": "Notifica il giorno prima di ogni arrivo",
+  "scripts": { "invia": "node invia.mjs" },
+  "dependencies": { "firebase-admin": "^12.7.0" }
+}
