@@ -1,6 +1,6 @@
 // Service worker: funzionamento offline dell'app e ricezione delle notifiche push.
-const CACHE = "casa-vacanze-v1";
-const SHELL = ["./", "./index.html", "./manifest.webmanifest", "./icons/icon-192.png", "./icons/icon-512.png", "./icons/badge-96.png"];
+const CACHE = "casa-vacanze-v2";
+const SHELL = ["./", "./index.html", "./manifest.webmanifest", "./icon-192.png", "./icon-512.png", "./badge-96.png"];
 
 self.addEventListener("install", (e) => {
   e.waitUntil(caches.open(CACHE).then((c) => c.addAll(SHELL)).then(() => self.skipWaiting()));
@@ -45,8 +45,8 @@ self.addEventListener("push", (e) => {
   e.waitUntil(
     self.registration.showNotification(title, {
       body: n.body || d.body || "",
-      icon: "icons/icon-192.png",
-      badge: "icons/badge-96.png",
+      icon: "icon-192.png",
+      badge: "badge-96.png",
       tag: d.tag || undefined,
       renotify: Boolean(d.tag),
       data: { url }

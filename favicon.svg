@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#17808C"/>
+      <stop offset="1" stop-color="#0A3F4B"/>
+    </linearGradient>
+    <clipPath id="card"><rect x="124" y="148" width="264" height="236" rx="38"/></clipPath>
+  </defs>
+  <rect width="512" height="512" rx="114" fill="url(#g)"/>
+  <circle cx="400" cy="112" r="150" fill="#FFFFFF" opacity="0.06"/>
+  <g clip-path="url(#card)">
+    <rect x="124" y="148" width="264" height="236" fill="#FFFFFF"/>
+    <rect x="124" y="148" width="264" height="66" fill="#F2A541"/>
+  </g>
+  <rect x="180" y="118" width="26" height="62" rx="13" fill="#FFFFFF" stroke="#0A3F4B" stroke-width="8"/>
+  <rect x="306" y="118" width="26" height="62" rx="13" fill="#FFFFFF" stroke="#0A3F4B" stroke-width="8"/>
+  <path d="M256 238 L326 296 L310 296 L310 356 Q310 362 304 362 L208 362 Q202 362 202 356 L202 296 L186 296 Z" fill="#17808C"/>
+  <rect x="242" y="314" width="28" height="48" rx="6" fill="#FFFFFF"/>
+</svg>
