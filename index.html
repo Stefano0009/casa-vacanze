@@ -1,0 +1,1015 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#F3F6F5" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0C1618" media="(prefers-color-scheme: dark)">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icons/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="icons/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Prenotazioni">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<style>:root{color-scheme:light;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
+<title>Casa Vacanze</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700&family=Figtree:wght@400;500;600;700&display=swap">
+<style>
+/* Layout: una colonna mobile-first (max 720px): testata fissa col mese, griglia calendario a fasce check-in/check-out, agenda, elenco soggiorni, pulsante + in basso. */
+:root {
+  --bg: #F3F6F5;
+  --surface: #FFFFFF;
+  --surface-2: #E9EFEE;
+  --ink: #10292F;
+  --muted: #5A6E72;
+  --faint: #A5B4B6;
+  --line: #DCE5E4;
+  --accent: #0F6E7A;
+  --accent-ink: #FFFFFF;
+  --accent-soft: #D7ECEE;
+  --sun: #D9851F;
+  --sun-soft: #FCEBD3;
+  --danger: #C0392F;
+  --danger-soft: #FBE3E0;
+  --c-airbnb: #DE4B57;
+  --c-booking: #2C59CC;
+  --c-privata: #1C8560;
+  --on-src: #FFFFFF;
+  --scrim: rgb(8 24 28 / 0.46);
+  --shadow: 0 1px 2px rgb(16 41 47 / 0.06), 0 8px 24px rgb(16 41 47 / 0.08);
+  --font-display: "Bricolage Grotesque", "Avenir Next", "Segoe UI", system-ui, sans-serif;
+  --font-body: "Figtree", "Segoe UI", system-ui, -apple-system, sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0C1618; --surface: #132327; --surface-2: #1A2E33; --ink: #E4EEEE; --muted: #93A8AC; --faint: #4E6367;
+    --line: #22383D; --accent: #45B4C1; --accent-ink: #062126; --accent-soft: #163A40; --sun: #F0A545; --sun-soft: #3A2A14;
+    --danger: #F07167; --danger-soft: #3D1D1B; --c-airbnb: #E5606B; --c-booking: #5480EA; --c-privata: #2E9E73;
+    --on-src: #FFFFFF; --scrim: rgb(0 0 0 / 0.6); --shadow: 0 1px 2px rgb(0 0 0 / 0.3), 0 8px 24px rgb(0 0 0 / 0.35);
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0C1618; --surface: #132327; --surface-2: #1A2E33; --ink: #E4EEEE; --muted: #93A8AC; --faint: #4E6367;
+  --line: #22383D; --accent: #45B4C1; --accent-ink: #062126; --accent-soft: #163A40; --sun: #F0A545; --sun-soft: #3A2A14;
+  --danger: #F07167; --danger-soft: #3D1D1B; --c-airbnb: #E5606B; --c-booking: #5480EA; --c-privata: #2E9E73;
+  --on-src: #FFFFFF; --scrim: rgb(0 0 0 / 0.6); --shadow: 0 1px 2px rgb(0 0 0 / 0.3), 0 8px 24px rgb(0 0 0 / 0.35);
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+html, body { min-height: 100%; }
+body {
+  background: var(--bg); color: var(--ink);
+  font-family: var(--font-body); font-size: 15px; line-height: 1.45;
+  -webkit-font-smoothing: antialiased; -webkit-tap-highlight-color: transparent;
+}
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--bg); }
+button, input, textarea { font: inherit; color: inherit; }
+button { cursor: pointer; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.wrap {
+  width: 100%; max-width: 720px; margin: 0 auto;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+.tnum { font-variant-numeric: tabular-nums; }
+svg.i { width: 20px; height: 20px; flex: none; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+
+/* Schermate di avvio e accesso */
+.splash, .login { min-height: 100vh; min-height: 100dvh; display: grid; place-items: center; padding-block: 32px; }
+.splash p { color: var(--muted); }
+.login-card { width: 100%; max-width: 380px; display: grid; gap: 18px; }
+.login-card .logo { width: 64px; height: 64px; border-radius: 16px; }
+.login-card h1 { font-family: var(--font-display); font-size: 30px; line-height: 1.1; margin: 0; text-wrap: balance; }
+.login-card p { margin: 0; color: var(--muted); }
+.login-err { color: var(--danger); background: var(--danger-soft); padding: 10px 12px; border-radius: 10px; font-size: 14px; }
+.link-btn { background: none; border: 0; padding: 0; color: var(--accent); font-weight: 600; justify-self: start; }
+
+/* Barra demo */
+.demo-bar { background: var(--sun-soft); color: var(--ink); font-size: 13px; }
+.demo-bar .wrap { padding-block: 8px; display: flex; gap: 8px; align-items: center; }
+.demo-bar b { color: var(--sun); }
+
+/* Testata */
+.top { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; background: var(--bg); }
+.top-in { display: grid; gap: 4px; padding-block: 10px 12px; }
+.top-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-width: 0; }
+.eyebrow { display: block; font-size: 11px; font-weight: 700; letter-spacing: 0.09em; text-transform: uppercase; color: var(--accent); }
+.top h1 { font-family: var(--font-display); font-weight: 700; font-size: 30px; line-height: 1.05; margin: 0; letter-spacing: -0.01em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+.top .pill-btn { height: 34px; border-radius: 10px; font-size: 13px; }
+.top .top-row:first-child .icon-btn { width: 34px; height: 34px; border-radius: 10px; }
+.top .top-row:first-child svg.i { width: 18px; height: 18px; }
+.top-actions { display: flex; gap: 6px; align-items: center; }
+.icon-btn { width: 40px; height: 40px; border-radius: 12px; border: 1px solid var(--line); background: var(--surface); display: grid; place-items: center; padding: 0; }
+.icon-btn:hover { background: var(--surface-2); }
+.pill-btn { height: 40px; padding: 0 14px; border-radius: 12px; border: 1px solid var(--line); background: var(--surface); font-weight: 600; font-size: 14px; }
+.pill-btn:hover { background: var(--surface-2); }
+
+main.wrap { display: grid; gap: 18px; padding-block: 4px 120px; }
+
+/* Calendario */
+.cal { background: var(--surface); border-radius: 18px; box-shadow: var(--shadow); overflow: hidden; touch-action: pan-y; }
+.dow { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); padding: 10px 0 8px; }
+.dow span { text-align: center; font-size: 11px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); }
+.dow span:nth-child(n+6) { color: var(--accent); }
+.grid { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); }
+.day { position: relative; min-height: 60px; border: 0; border-top: 1px solid var(--line); background: transparent; padding: 0; text-align: left; }
+.day:hover { background: var(--surface-2); }
+.day:focus-visible { outline-offset: -2px; }
+.day .num { position: absolute; top: 6px; left: 50%; transform: translateX(-50%); width: 26px; height: 26px; display: grid; place-items: center; border-radius: 50%; font-size: 13px; font-weight: 600; font-variant-numeric: tabular-nums; }
+.day.out .num { color: var(--faint); }
+.day.today .num { background: var(--accent); color: var(--accent-ink); }
+.bar { position: absolute; bottom: 7px; height: 20px; left: 0; right: 0; z-index: 1; }
+.bar.start { left: 54%; border-radius: 10px 0 0 10px; }
+.bar.end { right: 54%; border-radius: 0 10px 10px 0; }
+.bar.solo { left: 54%; right: 54%; }
+.bar-label { position: absolute; bottom: 7px; left: calc(54% + 7px); height: 20px; line-height: 20px; z-index: 2; color: var(--on-src); font-size: 11px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; pointer-events: none; }
+.bar-label.cont { left: 6px; }
+.src-airbnb { background: var(--c-airbnb); }
+.src-booking { background: var(--c-booking); }
+.src-privata { background: var(--c-privata); }
+.legend { display: flex; flex-wrap: wrap; gap: 6px 14px; padding: 12px 14px 14px; border-top: 1px solid var(--line); font-size: 12px; color: var(--muted); }
+.legend span { display: inline-flex; align-items: center; gap: 6px; }
+.legend i { width: 10px; height: 10px; border-radius: 3px; display: inline-block; }
+.legend .hint { margin-left: auto; }
+
+/* Riepilogo mese */
+.stats { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+@media (min-width: 640px) { .stats { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+.stat { background: var(--surface); border-radius: 14px; padding: 12px 14px; display: grid; gap: 2px; }
+.stat .k { font-size: 12px; color: var(--muted); }
+.stat .v { font-family: var(--font-display); font-weight: 700; font-size: 22px; font-variant-numeric: tabular-nums; line-height: 1.15; }
+.stat .v small { font-family: var(--font-body); font-size: 13px; font-weight: 500; color: var(--muted); }
+.meter { height: 5px; border-radius: 3px; background: var(--surface-2); overflow: hidden; margin-top: 6px; }
+.meter i { display: block; height: 100%; background: var(--accent); border-radius: 3px; }
+
+/* Agenda */
+.agenda { display: grid; gap: 8px; }
+.ag-item { display: flex; align-items: center; gap: 12px; width: 100%; text-align: left; border: 0; border-radius: 14px; padding: 12px 14px; background: var(--surface); }
+.ag-item.hot { background: var(--sun-soft); }
+.ag-item.hot .ag-ico { background: var(--sun); color: var(--surface); }
+.ag-ico { width: 36px; height: 36px; border-radius: 10px; display: grid; place-items: center; background: var(--accent-soft); color: var(--accent); flex: none; }
+.ag-txt { min-width: 0; display: grid; }
+.ag-txt b { font-weight: 700; }
+.ag-txt span { font-size: 13px; color: var(--muted); }
+
+/* Elenco */
+.list-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 10px; }
+.list-head h2 { font-family: var(--font-display); font-size: 21px; margin: 0; }
+.seg { display: inline-flex; background: var(--surface-2); border-radius: 11px; padding: 3px; }
+.seg button { border: 0; background: none; padding: 6px 12px; border-radius: 9px; font-size: 13px; font-weight: 600; color: var(--muted); }
+.seg button[aria-selected="true"] { background: var(--surface); color: var(--ink); box-shadow: 0 1px 2px rgb(0 0 0 / 0.08); }
+.list { display: grid; gap: 8px; }
+.card { display: flex; align-items: center; gap: 14px; width: 100%; text-align: left; border: 0; background: var(--surface); border-radius: 16px; padding: 12px 14px; }
+.card:hover { background: var(--surface-2); }
+.date-tile { width: 50px; flex: none; display: grid; justify-items: center; padding: 6px 0; border-radius: 12px; background: var(--surface-2); }
+.date-tile .d { font-family: var(--font-display); font-size: 22px; font-weight: 700; line-height: 1; font-variant-numeric: tabular-nums; }
+.date-tile .m { font-size: 11px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); margin-top: 3px; }
+.card-main { min-width: 0; flex: 1; display: grid; gap: 2px; }
+.card-top { display: flex; align-items: center; gap: 8px; min-width: 0; }
+.card-top .name { font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.card-meta { font-size: 13px; color: var(--muted); }
+.chip { display: inline-flex; align-items: center; height: 20px; padding: 0 8px; border-radius: 6px; font-size: 11px; font-weight: 700; color: var(--on-src); flex: none; }
+.status { flex: none; font-size: 12px; font-weight: 700; padding: 4px 8px; border-radius: 8px; background: var(--accent-soft); color: var(--accent); }
+.status.hot { background: var(--sun-soft); color: var(--sun); }
+.empty { background: var(--surface); border-radius: 16px; padding: 22px 18px; color: var(--muted); text-align: center; }
+
+/* Pulsante aggiungi */
+.fab {
+  position: fixed; z-index: 6;
+  right: calc(max(16px, env(safe-area-inset-right, 0px)) + 4px);
+  bottom: calc(18px + env(safe-area-inset-bottom, 0px));
+  height: 54px; padding: 0 20px 0 16px; border: 0; border-radius: 18px;
+  background: var(--accent); color: var(--accent-ink); font-weight: 700; font-size: 15px;
+  display: inline-flex; align-items: center; gap: 8px; box-shadow: 0 10px 24px rgb(15 110 122 / 0.32);
+}
+.fab svg.i { width: 22px; height: 22px; stroke-width: 2.4; }
+@media (min-width: 760px) { .fab { right: calc(50% - 360px + 16px); } }
+
+/* Foglio (dettaglio / modulo / impostazioni) */
+dialog.sheet { border: 0; padding: 0; margin: auto auto 0; width: 100%; max-width: 560px; max-height: calc(100dvh - 20px); overflow: auto; background: var(--surface); color: var(--ink); border-radius: 24px 24px 0 0; box-shadow: var(--shadow); }
+dialog.sheet::backdrop { background: var(--scrim); }
+dialog.sheet[open] { animation: up 0.24s cubic-bezier(.2,.8,.2,1); }
+@keyframes up { from { transform: translateY(40px); opacity: 0.4; } }
+@media (min-width: 720px) { dialog.sheet { margin: auto; border-radius: 24px; } }
+@media (prefers-reduced-motion: reduce) { dialog.sheet[open] { animation: none; } }
+.sheet-in {
+  display: grid; gap: 16px;
+  padding: 10px max(20px, env(safe-area-inset-right, 0px)) calc(22px + env(safe-area-inset-bottom, 0px)) max(20px, env(safe-area-inset-left, 0px));
+}
+.grabber { width: 40px; height: 5px; border-radius: 3px; background: var(--line); justify-self: center; }
+.sheet-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.sheet-head h2 { font-family: var(--font-display); font-size: 24px; line-height: 1.1; margin: 0; text-wrap: balance; }
+.facts { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+.fact { background: var(--surface-2); border-radius: 14px; padding: 10px 12px; display: grid; gap: 1px; }
+.fact .k { font-size: 12px; color: var(--muted); }
+.fact .v { font-weight: 700; }
+.fact .s { font-size: 12px; color: var(--muted); }
+.fact.wide { grid-column: 1 / -1; }
+.fact.tax { background: var(--accent-soft); }
+.fact.tax .v { font-family: var(--font-display); font-size: 22px; color: var(--accent); }
+.tax-line { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; background: var(--accent-soft); border-radius: 13px; padding: 12px 14px; }
+.tax-line .t { display: grid; min-width: 0; }
+.tax-line .t b { font-size: 14px; }
+.tax-line .t span { font-size: 12px; color: var(--muted); }
+.tax-line .v { font-family: var(--font-display); font-weight: 700; font-size: 22px; color: var(--accent); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.nowrap { white-space: nowrap; }
+.block { display: grid; gap: 8px; }
+.block-title { font-size: 12px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); }
+.phone-row { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.phone-num { flex-basis: 100%; font-size: 20px; font-weight: 700; font-variant-numeric: tabular-nums; user-select: all; }
+.note-box { background: var(--surface-2); border-radius: 14px; padding: 12px 14px; white-space: pre-wrap; overflow-wrap: anywhere; }
+.btn { height: 46px; padding: 0 16px; border-radius: 13px; border: 1px solid var(--line); background: var(--surface); font-weight: 600; display: inline-flex; align-items: center; justify-content: center; gap: 8px; text-decoration: none; color: var(--ink); }
+.btn:hover { background: var(--surface-2); }
+.btn.sm { height: 38px; padding: 0 12px; font-size: 14px; border-radius: 11px; }
+.btn.primary { background: var(--accent); color: var(--accent-ink); border-color: transparent; }
+.btn.primary:hover { filter: brightness(1.06); }
+.btn.danger { color: var(--danger); }
+.btn.danger-solid { background: var(--danger); color: var(--surface); border-color: transparent; }
+.btn-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 8px; }
+.meta-line { font-size: 12px; color: var(--muted); text-align: center; }
+.confirm { background: var(--danger-soft); border-radius: 14px; padding: 12px 14px; display: grid; gap: 10px; }
+
+/* Modulo */
+.form { display: grid; gap: 16px; }
+.field { display: grid; gap: 6px; }
+.field label, .field .lbl { font-size: 13px; font-weight: 600; color: var(--muted); }
+.input { height: 48px; width: 100%; border-radius: 13px; border: 1px solid var(--line); background: var(--bg); padding: 0 14px; font-size: 16px; }
+textarea.input { height: auto; min-height: 84px; padding: 12px 14px; resize: vertical; }
+.input:focus { outline: 2px solid var(--accent); outline-offset: -1px; border-color: transparent; }
+.field.err .input { border-color: var(--danger); }
+.err-msg { font-size: 13px; color: var(--danger); }
+.src-pick { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; }
+.src-pick input { position: absolute; opacity: 0; pointer-events: none; }
+.src-pick label { height: 42px; border-radius: 12px; border: 1px solid var(--line); display: grid; place-items: center; font-size: 13px; font-weight: 700; color: var(--muted); cursor: pointer; }
+.src-pick input:checked + label { color: var(--on-src); border-color: transparent; }
+.src-pick input:checked + label.l-airbnb { background: var(--c-airbnb); }
+.src-pick input:checked + label.l-booking { background: var(--c-booking); }
+.src-pick input:checked + label.l-privata { background: var(--c-privata); }
+.src-pick input:focus-visible + label { outline: 2px solid var(--accent); outline-offset: 2px; }
+.row2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+.stepper { display: flex; align-items: center; justify-content: space-between; height: 48px; border-radius: 13px; border: 1px solid var(--line); background: var(--bg); padding: 0 4px; }
+.stepper button { width: 40px; height: 40px; border-radius: 10px; border: 0; background: var(--surface); font-size: 20px; font-weight: 600; line-height: 1; box-shadow: 0 1px 2px rgb(0 0 0 / 0.08); }
+.stepper button:disabled { opacity: 0.35; cursor: default; }
+.stepper output { font-weight: 700; font-size: 17px; font-variant-numeric: tabular-nums; }
+.hint-line { font-size: 13px; color: var(--muted); }
+.hint-line b { color: var(--ink); }
+.warn { display: flex; gap: 10px; align-items: flex-start; background: var(--sun-soft); border-radius: 13px; padding: 10px 12px; font-size: 14px; }
+.warn svg.i { color: var(--sun); margin-top: 1px; }
+
+/* Impostazioni */
+.set-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 0; border-top: 1px solid var(--line); }
+.set-row:first-of-type { border-top: 0; }
+.set-row .t { display: grid; min-width: 0; }
+.set-row .t b { font-weight: 700; }
+.set-row .t span { font-size: 13px; color: var(--muted); overflow-wrap: anywhere; }
+
+/* Avvisi a comparsa */
+.toast { position: fixed; left: 50%; bottom: calc(86px + env(safe-area-inset-bottom, 0px)); transform: translate(-50%, 20px); z-index: 50; background: var(--ink); color: var(--bg); padding: 11px 16px; border-radius: 12px; font-weight: 600; font-size: 14px; opacity: 0; pointer-events: none; transition: opacity .2s, transform .2s; max-width: calc(100% - 32px); }
+.toast.show { opacity: 1; transform: translate(-50%, 0); }
+
+@media (min-width: 560px) {
+  .day { min-height: 74px; }
+  .top h1 { font-size: 32px; }
+  .bar-label { font-size: 12px; }
+}
+@media (max-width: 380px) {
+  .top h1 { font-size: 24px; }
+  .pill-btn { padding: 0 10px; }
+  .icon-btn { width: 36px; height: 36px; }
+  .stat .v { font-size: 19px; }
+}
+</style>
+
+<div class="splash wrap" id="splash"><p>Caricamento…</p></div>
+
+<section class="login wrap" id="login" hidden>
+  <form class="login-card" id="loginForm" novalidate>
+    <svg class="logo" viewBox="0 0 512 512" aria-hidden="true"><defs><linearGradient id="lg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#17808C"/><stop offset="1" stop-color="#0A3F4B"/></linearGradient><clipPath id="lc"><rect x="124" y="148" width="264" height="236" rx="38"/></clipPath></defs><rect width="512" height="512" rx="114" fill="url(#lg)"/><g clip-path="url(#lc)"><rect x="124" y="148" width="264" height="236" fill="#FFFFFF"/><rect x="124" y="148" width="264" height="66" fill="#F2A541"/></g><rect x="180" y="118" width="26" height="62" rx="13" fill="#FFFFFF" stroke="#0A3F4B" stroke-width="8"/><rect x="306" y="118" width="26" height="62" rx="13" fill="#FFFFFF" stroke="#0A3F4B" stroke-width="8"/><path d="M256 238 L326 296 L310 296 L310 356 Q310 362 304 362 L208 362 Q202 362 202 356 L202 296 L186 296 Z" fill="#17808C"/><rect x="242" y="314" width="28" height="48" rx="6" fill="#FFFFFF"/></svg>
+    <h1 id="loginTitle">Prenotazioni</h1>
+    <p>Accedi con l'account che ti è stato creato.</p>
+    <div class="field"><label for="lEmail">Email</label><input class="input" id="lEmail" type="email" autocomplete="username" required></div>
+    <div class="field"><label for="lPass">Password</label><input class="input" id="lPass" type="password" autocomplete="current-password" required></div>
+    <div class="login-err" id="loginErr" hidden></div>
+    <button class="btn primary" type="submit" id="loginBtn">Accedi</button>
+    <button class="link-btn" type="button" id="resetBtn">Password dimenticata?</button>
+  </form>
+</section>
+
+<div id="app" hidden>
+  <div class="demo-bar" id="demoBar" hidden><div class="wrap"><b>Demo</b><span>Dati di esempio, salvati solo su questo dispositivo.</span></div></div>
+  <header class="top">
+    <div class="wrap top-in">
+      <div class="top-row">
+        <span class="eyebrow" id="houseName">Casa Vacanze</span>
+        <div class="top-actions">
+          <button class="pill-btn" id="todayBtn">Oggi</button>
+          <button class="icon-btn" id="settingsBtn" aria-label="Account e notifiche"></button>
+        </div>
+      </div>
+      <div class="top-row">
+        <h1 id="monthTitle">&nbsp;</h1>
+        <div class="top-actions">
+          <button class="icon-btn" id="prevBtn" aria-label="Mese precedente"></button>
+          <button class="icon-btn" id="nextBtn" aria-label="Mese successivo"></button>
+        </div>
+      </div>
+    </div>
+  </header>
+  <main class="wrap">
+    <section class="cal" aria-label="Calendario del mese">
+      <div class="dow" aria-hidden="true"><span>Lun</span><span>Mar</span><span>Mer</span><span>Gio</span><span>Ven</span><span>Sab</span><span>Dom</span></div>
+      <div class="grid" id="grid"></div>
+      <div class="legend" id="legend"></div>
+    </section>
+    <section class="stats" id="stats" aria-label="Riepilogo del mese"></section>
+    <section class="agenda" id="agenda" aria-label="Agenda"></section>
+    <section>
+      <div class="list-head">
+        <h2>Soggiorni</h2>
+        <div class="seg" role="tablist">
+          <button role="tab" id="tabNext" aria-selected="true">Prossimi</button>
+          <button role="tab" id="tabPast" aria-selected="false">Passati</button>
+        </div>
+      </div>
+      <div class="list" id="list"></div>
+    </section>
+  </main>
+  <button class="fab" id="addBtn" hidden></button>
+</div>
+
+<dialog class="sheet" id="sheet" aria-labelledby="sheetTitle"><div id="sheetBody"></div></dialog>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script type="module">
+/* ===================== CONFIGURAZIONE — MODIFICA QUI ===================== */
+const CONFIG = {
+  nomeCasa: "Casa Vacanze",
+  orarioCheckin: "15:00",
+  orarioCheckout: "10:00",
+  // Imposta di soggiorno: euro a notte per ogni ospite dai 14 anni in su (gli "adulti"),
+  // pagata solo per le prime maxNotti notti (0 = nessun limite).
+  impostaSoggiorno: { tariffa: 3, maxNotti: 10 },
+  // Incolla qui la configurazione del tuo progetto Firebase (vedi LEGGIMI.md, passo 2).
+  // Finché apiKey è vuota l'app gira in modalità demo, con dati salvati solo sul dispositivo.
+  firebase: {
+    apiKey: "AIzaSyBxTeR_pz0YIH2E5kHx6Zc4nEtMSp64Hps",
+    authDomain: "casa-vacanze-bf77d.firebaseapp.com",
+    projectId: "casa-vacanze-bf77d",
+    storageBucket: "casa-vacanze-bf77d.firebasestorage.app",
+    messagingSenderId: "136827928196",
+    appId: "1:136827928196:web:64d5aadd3ff6ebdfc4ccd1"
+  },
+  // Chiave per le notifiche push (Firebase > Impostazioni progetto > Cloud Messaging > Web Push).
+  vapidKey: "BGWku77mGuZndzZNbNBtONw01mVBalcGXR0bxTqRndg0PPQyUtu2MyM2BBhfe4iR5G3vLF8w60UHK6HOHOLVz1o",
+  // Email di chi può aggiungere/modificare prenotazioni. Deve coincidere con le regole Firestore.
+  editori: ["stefaninomusolino@gmail.com", "seforamusolino@gmail.com"]
+};
+/* ========================================================================= */
+
+const FB = "https://www.gstatic.com/firebasejs/10.14.1/";
+const FONTI = {
+  airbnb:  { label: "Airbnb",  legenda: "Airbnb",           cls: "src-airbnb" },
+  booking: { label: "Booking", legenda: "Booking",          cls: "src-booking" },
+  privata: { label: "Privata", legenda: "Occupata privata", cls: "src-privata" }
+};
+const $ = (s, r = document) => r.querySelector(s);
+const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+
+/* ---------- Icone ---------- */
+const P = {
+  chevL: '<path d="M15 18l-6-6 6-6"/>',
+  chevR: '<path d="M9 18l6-6-6-6"/>',
+  plus: '<path d="M12 5v14M5 12h14"/>',
+  x: '<path d="M18 6L6 18M6 6l12 12"/>',
+  user: '<path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>',
+  phone: '<path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .4 1.9.7 2.8a2 2 0 0 1-.5 2.1L8.1 9.9a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.8.7a2 2 0 0 1 1.7 2z"/>',
+  chat: '<path d="M21 11.5a8.4 8.4 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.4 8.4 0 0 1-3.8-.9L3 21l1.9-5.7a8.4 8.4 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.4 8.4 0 0 1 3.8-.9h.5a8.5 8.5 0 0 1 8 8v.5z"/>',
+  copy: '<rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>',
+  edit: '<path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/>',
+  trash: '<path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>',
+  bell: '<path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9M13.7 21a2 2 0 0 1-3.4 0"/>',
+  cal: '<rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/>',
+  in: '<path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4M10 17l5-5-5-5M15 12H3"/>',
+  out: '<path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/>',
+  swap: '<path d="M17 1l4 4-4 4M3 11V9a4 4 0 0 1 4-4h14M7 23l-4-4 4-4M21 13v2a4 4 0 0 1-4 4H3"/>',
+  alert: '<path d="M10.3 3.9L1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0zM12 9v4M12 17h.01"/>',
+  home: '<path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M9 22V12h6v10"/>'
+};
+const ico = (n) => `<svg class="i" viewBox="0 0 24 24" aria-hidden="true">${P[n]}</svg>`;
+
+/* ---------- Date (stringhe AAAA-MM-GG, calcoli in UTC per evitare problemi di ora legale) ---------- */
+const DAY = 864e5;
+const parse = (iso) => { const [y, m, d] = iso.split("-").map(Number); return Date.UTC(y, m - 1, d); };
+const fmt = (ms) => new Date(ms).toISOString().slice(0, 10);
+const addDays = (iso, n) => fmt(parse(iso) + n * DAY);
+const diffDays = (a, b) => Math.round((parse(b) - parse(a)) / DAY);
+const todayISO = () => { const n = new Date(); return `${n.getFullYear()}-${String(n.getMonth() + 1).padStart(2, "0")}-${String(n.getDate()).padStart(2, "0")}`; };
+const F = (o) => new Intl.DateTimeFormat("it-IT", { timeZone: "UTC", ...o });
+const fShort = F({ weekday: "short", day: "numeric", month: "short" });
+const fLong = F({ weekday: "long", day: "numeric", month: "long" });
+const fMonth = F({ month: "long", year: "numeric" });
+const fMon = F({ month: "short" });
+const cap = (s) => s.charAt(0).toUpperCase() + s.slice(1);
+const short = (iso) => fShort.format(parse(iso));
+const long = (iso) => cap(fLong.format(parse(iso)));
+const pl = (n, s, p) => `${n} ${n === 1 ? s : p}`;
+const fEur = new Intl.NumberFormat("it-IT", { style: "currency", currency: "EUR", minimumFractionDigits: 0, maximumFractionDigits: 2 });
+const eur = (n) => fEur.format(n);
+/* Imposta di soggiorno: adulti (14+) × notti tassabili × tariffa. Le prenotazioni salvate tengono la tariffa del momento. */
+function imposta(b) {
+  const tariffa = typeof b.tariffaImposta === "number" ? b.tariffaImposta : CONFIG.impostaSoggiorno.tariffa;
+  const max = CONFIG.impostaSoggiorno.maxNotti;
+  const notti = max ? Math.min(b.notti, max) : b.notti;
+  if (isPriv(b)) return { tot: 0, tariffa, notti: 0, tagliate: false };
+  return { tot: Math.round((Number(b.adulti) || 0) * notti * tariffa * 100) / 100, tariffa, notti, tagliate: notti < b.notti };
+}
+function impostaCalcolo(b) {
+  const tx = imposta(b);
+  if (!b.adulti) return "Nessun ospite dai 14 anni in su: esente";
+  return `${pl(b.adulti, "adulto", "adulti")} × ${pl(tx.notti, "notte", "notti")} × ${eur(tx.tariffa)}` +
+    (tx.tagliate ? ` · si pagano max ${tx.notti} notti` : "");
+}
+/* Occupata privata: solo date, senza ospite, ospiti né imposta */
+function isPriv(b) { return b && b.provenienza === "privata"; }
+function nomeDi(b) { return isPriv(b) ? "Occupata privata" : b.nome; }
+const ospitiTxt = (b) =>[pl(b.adulti, "adulto", "adulti"), b.bambini ? pl(b.bambini, "bambino", "bambini") : ""].filter(Boolean).join(" · ");
+
+/* ---------- Stato ---------- */
+const S = { bookings: [], view: null, tab: "next", editor: false, mode: "demo", user: null, store: null, app: null, db: null, openedFromLink: false };
+
+/* ---------- Archivio demo (solo su questo dispositivo) ---------- */
+function demoStore() {
+  const KEY = "casa-vacanze-demo-v4";
+  const subs = new Set();
+  const load = () => { try { const v = JSON.parse(localStorage.getItem(KEY)); return Array.isArray(v) ? v : null; } catch { return null; } };
+  const persist = () => { try { localStorage.setItem(KEY, JSON.stringify(items)); } catch {} };
+  const seed = () => {
+    const t = todayISO();
+    const mk = (id, provenienza, nome, off, notti, adulti, bambini, telefono, note) => {
+      const arrivo = addDays(t, off);
+      return { id, provenienza, nome, arrivo, notti, partenza: addDays(arrivo, notti), adulti, bambini, telefono, note, creatoDa: "esempio" };
+    };
+    return [
+      mk("e2", "airbnb", "Laura Bianchi", -3, 4, 2, 0, "+39 347 812 4419", "Arriva in treno, chiede info sul parcheggio."),
+      mk("e3", "privata", "Occupata privata", 1, 3, 0, 0, "", ""),
+      mk("e4", "booking", "Thomas Keller", 6, 5, 2, 2, "+49 171 4428903", "Check-in tardivo, verso le 21.")
+    ];
+  };
+  let items = load() || seed();
+  const emit = () => { const copy = items.map((x) => ({ ...x })); subs.forEach((f) => f(copy)); };
+  addEventListener("storage", (e) => { if (e.key === KEY) { items = load() || []; emit(); } });
+  return {
+    subscribe(cb) { subs.add(cb); cb(items.map((x) => ({ ...x }))); return () => subs.delete(cb); },
+    async save(b) {
+      const x = { ...b };
+      if (!x.id) x.id = "d" + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+      const i = items.findIndex((y) => y.id === x.id);
+      if (i >= 0) items[i] = x; else items.push(x);
+      persist(); emit();
+    },
+    async remove(id) { items = items.filter((y) => y.id !== id); persist(); emit(); },
+    reset() { items = seed(); persist(); emit(); }
+  };
+}
+
+/* ---------- Archivio Firebase (condiviso in tempo reale) ---------- */
+async function firebaseStore() {
+  const FS = await import(FB + "firebase-firestore.js");
+  let db;
+  try { db = FS.initializeFirestore(S.app, { localCache: FS.persistentLocalCache({ tabManager: FS.persistentMultipleTabManager() }) }); }
+  catch { db = FS.getFirestore(S.app); }
+  S.db = db; S.FS = FS;
+  const col = FS.collection(db, "prenotazioni");
+  return {
+    subscribe(cb, onErr) { return FS.onSnapshot(col, (snap) => cb(snap.docs.map((d) => ({ id: d.id, ...d.data() }))), onErr); },
+    async save(b) {
+      const { id, ...data } = b;
+      data.aggiornato = FS.serverTimestamp();
+      data.aggiornatoDa = S.user.email;
+      if (id) await FS.setDoc(FS.doc(db, "prenotazioni", id), data);
+      else { data.creato = FS.serverTimestamp(); data.creatoDa = S.user.email; await FS.addDoc(col, data); }
+    },
+    async remove(id) { await FS.deleteDoc(FS.doc(db, "prenotazioni", id)); }
+  };
+}
+
+/* ---------- Avvio ---------- */
+$("#prevBtn").innerHTML = ico("chevL");
+$("#nextBtn").innerHTML = ico("chevR");
+$("#settingsBtn").innerHTML = ico("user");
+$("#addBtn").innerHTML = ico("plus") + "<span>Prenotazione</span>";
+$("#houseName").textContent = CONFIG.nomeCasa;
+$("#loginTitle").textContent = CONFIG.nomeCasa;
+document.title = CONFIG.nomeCasa;
+
+function boot() {
+  if (CONFIG.firebase.apiKey) initFirebase().catch((e) => { console.error(e); $("#splash").innerHTML = "<p>Impossibile collegarsi a Firebase. Controlla la configurazione e la connessione.</p>"; });
+  else { S.mode = "demo"; S.editor = true; S.store = demoStore(); startApp(); }
+}
+
+async function initFirebase() {
+  S.mode = "firebase";
+  const { initializeApp } = await import(FB + "firebase-app.js");
+  S.app = initializeApp(CONFIG.firebase);
+  const A = await import(FB + "firebase-auth.js");
+  S.A = A; S.auth = A.getAuth(S.app);
+  if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch((e) => console.warn("Service worker non registrato", e));
+  let unsub = null;
+  A.onAuthStateChanged(S.auth, async (u) => {
+    if (unsub) { unsub(); unsub = null; }
+    if (!u) { S.user = null; showLogin(); return; }
+    S.user = u;
+    S.editor = CONFIG.editori.map((e) => e.toLowerCase()).includes((u.email || "").toLowerCase());
+    S.store = await firebaseStore();
+    unsub = startApp();
+  });
+}
+
+function showLogin() {
+  $("#splash").hidden = true; $("#app").hidden = true; $("#login").hidden = false;
+  $("#lEmail").focus();
+}
+
+const ERR_AUTH = {
+  "auth/invalid-credential": "Email o password non corrette.",
+  "auth/wrong-password": "Email o password non corrette.",
+  "auth/user-not-found": "Non esiste un account con questa email.",
+  "auth/invalid-email": "L'indirizzo email non è valido.",
+  "auth/too-many-requests": "Troppi tentativi. Riprova tra qualche minuto.",
+  "auth/network-request-failed": "Nessuna connessione. Controlla la rete e riprova."
+};
+$("#loginForm").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const err = $("#loginErr"); err.hidden = true;
+  const email = $("#lEmail").value.trim(), pass = $("#lPass").value;
+  if (!email || !pass) { err.textContent = "Inserisci email e password."; err.hidden = false; return; }
+  $("#loginBtn").disabled = true; $("#loginBtn").textContent = "Accesso…";
+  try { await S.A.signInWithEmailAndPassword(S.auth, email, pass); }
+  catch (x) { err.textContent = ERR_AUTH[x.code] || "Accesso non riuscito. Riprova."; err.hidden = false; }
+  finally { $("#loginBtn").disabled = false; $("#loginBtn").textContent = "Accedi"; }
+});
+$("#resetBtn").addEventListener("click", async () => {
+  const err = $("#loginErr");
+  const email = $("#lEmail").value.trim();
+  if (!email) { err.textContent = "Scrivi prima la tua email, poi tocca di nuovo «Password dimenticata?»."; err.hidden = false; return; }
+  try { await S.A.sendPasswordResetEmail(S.auth, email); err.hidden = true; toast("Ti abbiamo mandato un'email per reimpostare la password"); }
+  catch (x) { err.textContent = ERR_AUTH[x.code] || "Invio non riuscito. Controlla l'email."; err.hidden = false; }
+});
+
+function startApp() {
+  $("#splash").hidden = true; $("#login").hidden = true; $("#app").hidden = false;
+  $("#demoBar").hidden = S.mode !== "demo";
+  $("#addBtn").hidden = !S.editor;
+  if (!S.view) { const t = todayISO(); S.view = [Number(t.slice(0, 4)), Number(t.slice(5, 7)) - 1]; }
+  renderLegend();
+  return S.store.subscribe((list) => {
+    S.bookings = list
+      .filter((b) => b && b.arrivo && b.partenza)
+      .map((b) => ({ ...b, notti: Number(b.notti) || diffDays(b.arrivo, b.partenza), adulti: Number(b.adulti) || 0, bambini: Number(b.bambini) || 0 }))
+      .sort((a, b) => a.arrivo.localeCompare(b.arrivo));
+    renderAll();
+    // Apertura da notifica: ?p=<id>
+    const pid = new URLSearchParams(location.search).get("p");
+    if (pid && !S.openedFromLink) { S.openedFromLink = true; const b = S.bookings.find((x) => x.id === pid); if (b) { goTo(b.arrivo); openDetail(b.id); } }
+    // Se la scheda aperta è stata modificata da qualcun altro, aggiornala
+    if (sheet.open && sheet.dataset.view === "detail") { const b = S.bookings.find((x) => x.id === sheet.dataset.id); if (b) openDetail(b.id); else closeSheet(); }
+  }, (e) => {
+    console.error(e);
+    $("#list").innerHTML = `<div class="empty">${e.code === "permission-denied" ? "Il tuo account non è autorizzato a vedere le prenotazioni. Chiedi a chi gestisce l'app di aggiungere la tua email." : "Impossibile caricare le prenotazioni. Controlla la connessione."}</div>`;
+  });
+}
+
+/* ---------- Disegno ---------- */
+function renderAll() { renderCalendar(); renderStats(); renderAgenda(); renderList(); }
+
+function renderLegend() {
+  $("#legend").innerHTML = Object.values(FONTI).map((f) => `<span><i class="${f.cls}"></i>${f.legenda}</span>`).join("") +
+    (S.editor ? `<span class="hint">Tocca un giorno libero per prenotare</span>` : "");
+}
+
+function nightOwner(d) { return S.bookings.find((b) => b.arrivo <= d && d < b.partenza); }
+
+function renderCalendar() {
+  const [y, m] = S.view;
+  $("#monthTitle").textContent = cap(fMonth.format(Date.UTC(y, m, 1)));
+  const first = fmt(Date.UTC(y, m, 1));
+  const dim = new Date(Date.UTC(y, m + 1, 0)).getUTCDate();
+  const lead = (new Date(Date.UTC(y, m, 1)).getUTCDay() + 6) % 7;
+  const rows = Math.ceil((lead + dim) / 7);
+  const start = addDays(first, -lead);
+  const today = todayISO();
+  let html = "";
+  for (let i = 0; i < rows * 7; i++) {
+    const d = addDays(start, i), col = i % 7;
+    const inMonth = d.slice(0, 7) === first.slice(0, 7);
+    let segs = "";
+    for (const b of S.bookings) {
+      if (d < b.arrivo || d > b.partenza) continue;
+      const c = (FONTI[b.provenienza] || FONTI.privata).cls;
+      if (d === b.arrivo) {
+        const w = Math.min(b.notti, 6.5 - col);
+        segs += `<span class="bar start ${c}"></span><span class="bar-label" style="width:calc(${w} * 100% - 12px)">${esc(isPriv(b) ? "Privata" : b.nome)}</span>`;
+      } else if (d === b.partenza) {
+        segs += `<span class="bar end ${c}"></span>`;
+      } else {
+        segs += `<span class="bar ${c}"></span>`;
+        if (col === 0) { const w = Math.min(diffDays(d, b.partenza), 7) - 0.5; segs += `<span class="bar-label cont" style="width:calc(${w} * 100% - 10px)">${esc(isPriv(b) ? "Privata" : b.nome)}</span>`; }
+      }
+    }
+    const own = nightOwner(d);
+    const label = long(d) + (own ? `, occupato: ${nomeDi(own)}` : ", libero");
+    html += `<button class="day${inMonth ? "" : " out"}${d === today ? " today" : ""}" data-d="${d}" aria-label="${esc(label)}"><span class="num">${Number(d.slice(8))}</span>${segs}</button>`;
+  }
+  $("#grid").innerHTML = html;
+}
+
+function renderStats() {
+  const [y, m] = S.view;
+  const dim = new Date(Date.UTC(y, m + 1, 0)).getUTCDate();
+  let occ = 0, arr = 0, osp = 0, tax = 0;
+  for (let day = 1; day <= dim; day++) {
+    const d = fmt(Date.UTC(y, m, day));
+    if (nightOwner(d)) occ++;
+    for (const b of S.bookings) if (b.arrivo === d && !isPriv(b)) { arr++; osp += b.adulti + b.bambini; tax += imposta(b).tot; }
+  }
+  const pct = Math.round((occ / dim) * 100);
+  $("#stats").innerHTML = `
+    <div class="stat"><span class="k">Notti occupate</span><span class="v tnum">${occ}<small> / ${dim}</small></span></div>
+    <div class="stat"><span class="k">Occupazione</span><span class="v tnum">${pct}%</span><div class="meter"><i style="width:${pct}%"></i></div></div>
+    <div class="stat"><span class="k">Arrivi</span><span class="v tnum">${arr}<small> · ${pl(osp, "ospite", "ospiti")}</small></span></div>
+    <div class="stat"><span class="k">Imposta di soggiorno</span><span class="v tnum">${eur(tax)}</span><span class="k">arrivi del mese</span></div>`;
+}
+
+function renderAgenda() {
+  const t = todayISO(), tm = addDays(t, 1);
+  const rows = [];
+  const outT = S.bookings.filter((b) => b.partenza === t), inT = S.bookings.filter((b) => b.arrivo === t), inTm = S.bookings.filter((b) => b.arrivo === tm);
+  const fino = (b) => `fino a ${short(b.partenza)} · ${pl(b.notti, "notte", "notti")}`;
+  if (outT.length && inT.length && !isPriv(outT[0]) && !isPriv(inT[0])) rows.push({ ico: "swap", hot: false, id: inT[0].id, t: "Oggi è giorno di cambio", s: `Parte ${outT[0].nome} entro le ${CONFIG.orarioCheckout}, arriva ${inT[0].nome} dalle ${CONFIG.orarioCheckin}` });
+  else {
+    outT.forEach((b) => rows.push(isPriv(b)
+      ? { ico: "out", id: b.id, t: "Oggi finisce l'occupazione privata", s: "La casa torna libera" }
+      : { ico: "out", id: b.id, t: `Oggi parte ${b.nome}`, s: `Check-out entro le ${CONFIG.orarioCheckout}` }));
+    inT.forEach((b) => rows.push(isPriv(b)
+      ? { ico: "home", id: b.id, t: "Da oggi occupata privata", s: fino(b) }
+      : { ico: "in", id: b.id, t: `Oggi arriva ${b.nome}`, s: `${ospitiTxt(b)} · check-in dalle ${CONFIG.orarioCheckin}` }));
+  }
+  inTm.forEach((b) => {
+    if (isPriv(b)) { rows.push({ ico: "home", id: b.id, t: "Da domani occupata privata", s: fino(b) }); return; }
+    const cambio = S.bookings.some((o) => o.partenza === tm && !isPriv(o));
+    rows.push({ ico: "bell", hot: true, id: b.id, t: `Domani arriva ${b.nome}`, s: `${ospitiTxt(b)} · ${pl(b.notti, "notte", "notti")} · imposta ${eur(imposta(b).tot)}${cambio ? " · giorno di cambio" : ""}` });
+  });
+  if (!rows.length) {
+    const nx = S.bookings.find((b) => b.arrivo > tm && !isPriv(b));
+    if (nx) { const n = diffDays(t, nx.arrivo); rows.push({ ico: "cal", id: nx.id, t: `Prossimo arrivo: ${nx.nome}`, s: `${cap(short(nx.arrivo))}, tra ${n} giorni` }); }
+  }
+  $("#agenda").innerHTML = rows.map((r) => `<button class="ag-item${r.hot ? " hot" : ""}" data-id="${esc(r.id)}"><span class="ag-ico">${ico(r.ico)}</span><span class="ag-txt"><b>${esc(r.t)}</b><span>${esc(r.s)}</span></span></button>`).join("");
+}
+
+function statusOf(b, t) {
+  if (b.partenza === t) return { txt: "Parte oggi", hot: false };
+  if (b.arrivo === t) return { txt: "Arriva oggi", hot: true };
+  if (b.arrivo < t && t < b.partenza) return { txt: "In corso", hot: false };
+  const n = diffDays(t, b.arrivo);
+  if (n === 1) return { txt: "Domani", hot: true };
+  if (n > 1 && n <= 30) return { txt: `Tra ${n} gg`, hot: false };
+  return null;
+}
+
+function renderList() {
+  const t = todayISO();
+  const items = S.tab === "next"
+    ? S.bookings.filter((b) => b.partenza >= t)
+    : S.bookings.filter((b) => b.partenza < t).reverse();
+  if (!items.length) {
+    $("#list").innerHTML = `<div class="empty">${S.tab === "next"
+      ? (S.editor ? "Nessun soggiorno in programma. Tocca «Prenotazione» o un giorno libero del calendario per aggiungerne uno." : "Nessun soggiorno in programma.")
+      : "Nessun soggiorno passato."}</div>`;
+    return;
+  }
+  $("#list").innerHTML = items.map((b) => {
+    const f = FONTI[b.provenienza] || FONTI.privata;
+    const st = S.tab === "next" ? statusOf(b, t) : null;
+    return `<button class="card" data-id="${esc(b.id)}">
+      <span class="date-tile"><span class="d">${Number(b.arrivo.slice(8))}</span><span class="m">${fMon.format(parse(b.arrivo)).replace(".", "")}</span></span>
+      <span class="card-main">
+        <span class="card-top"><span class="name">${esc(nomeDi(b))}</span>${isPriv(b) ? "" : `<span class="chip ${f.cls}">${f.label}</span>`}</span>
+        <span class="card-meta tnum">${short(b.arrivo)} → ${short(b.partenza)}</span>
+        <span class="card-meta">${isPriv(b) ? pl(b.notti, "notte", "notti") : `${pl(b.notti, "notte", "notti")} · ${ospitiTxt(b)} · <span class="nowrap">imposta ${eur(imposta(b).tot)}</span>`}</span>
+      </span>
+      ${st ? `<span class="status${st.hot ? " hot" : ""}">${st.txt}</span>` : ""}
+    </button>`;
+  }).join("");
+}
+
+/* ---------- Navigazione ---------- */
+function shiftMonth(n) { let [y, m] = S.view; m += n; y += Math.floor(m / 12); m = ((m % 12) + 12) % 12; S.view = [y, m]; renderCalendar(); renderStats(); }
+function goTo(iso) { S.view = [Number(iso.slice(0, 4)), Number(iso.slice(5, 7)) - 1]; renderCalendar(); renderStats(); }
+$("#prevBtn").addEventListener("click", () => shiftMonth(-1));
+$("#nextBtn").addEventListener("click", () => shiftMonth(1));
+$("#todayBtn").addEventListener("click", () => goTo(todayISO()));
+$("#tabNext").addEventListener("click", () => setTab("next"));
+$("#tabPast").addEventListener("click", () => setTab("past"));
+function setTab(t) { S.tab = t; $("#tabNext").setAttribute("aria-selected", t === "next"); $("#tabPast").setAttribute("aria-selected", t === "past"); renderList(); }
+$("#addBtn").addEventListener("click", () => openForm(null, nextFreeDay()));
+$("#settingsBtn").addEventListener("click", openSettings);
+
+let tx = null, ty = null;
+$("#grid").addEventListener("touchstart", (e) => { tx = e.touches[0].clientX; ty = e.touches[0].clientY; }, { passive: true });
+$("#grid").addEventListener("touchend", (e) => {
+  if (tx === null) return;
+  const dx = e.changedTouches[0].clientX - tx, dy = e.changedTouches[0].clientY - ty;
+  if (Math.abs(dx) > 60 && Math.abs(dx) > Math.abs(dy) * 1.5) shiftMonth(dx < 0 ? 1 : -1);
+  tx = ty = null;
+});
+$("#grid").addEventListener("click", (e) => {
+  const cell = e.target.closest(".day"); if (!cell) return;
+  const d = cell.dataset.d, own = nightOwner(d);
+  if (own) openDetail(own.id);
+  else if (S.editor) openForm(null, d);
+  else toast(`${cap(short(d))}: libero`);
+});
+document.addEventListener("click", (e) => {
+  const el = e.target.closest(".card[data-id], .ag-item[data-id]");
+  if (el) openDetail(el.dataset.id);
+});
+
+function nextFreeDay() {
+  let d = todayISO();
+  for (let i = 0; i < 400 && nightOwner(d); i++) d = addDays(d, 1);
+  return d;
+}
+
+/* ---------- Foglio ---------- */
+const sheet = $("#sheet");
+function openSheet(view, html, id = "") {
+  sheet.dataset.view = view; sheet.dataset.id = id;
+  $("#sheetBody").innerHTML = `<div class="sheet-in">${html}</div>`;
+  if (!sheet.open) sheet.showModal();
+}
+function closeSheet() { if (sheet.open) sheet.close(); }
+sheet.addEventListener("click", (e) => { if (e.target === sheet) closeSheet(); });
+sheet.addEventListener("close", () => { sheet.dataset.view = ""; });
+const head = (title, chip = "") => `<div class="grabber" aria-hidden="true"></div><div class="sheet-head"><h2 id="sheetTitle">${title}</h2><span style="display:flex;gap:8px;align-items:center">${chip}<button class="icon-btn" data-close aria-label="Chiudi">${ico("x")}</button></span></div>`;
+$("#sheetBody").addEventListener("click", (e) => { if (e.target.closest("[data-close]")) closeSheet(); });
+
+/* ---------- Telefono ---------- */
+function waNumber(tel) {
+  let s = String(tel || "").trim();
+  if (!s) return "";
+  const plus = s.startsWith("+");
+  s = s.replace(/\D/g, "");
+  if (!plus && s.startsWith("00")) s = s.slice(2);
+  else if (!plus && s.length === 10 && s.startsWith("3")) s = "39" + s;
+  return s;
+}
+
+/* ---------- Dettaglio prenotazione ---------- */
+function openDetail(id) {
+  const b = S.bookings.find((x) => x.id === id); if (!b) return;
+  const f = FONTI[b.provenienza] || FONTI.privata;
+  const tx = imposta(b);
+  const wa = waNumber(b.telefono);
+  const phone = b.telefono && !isPriv(b) ? `
+    <div class="block"><span class="block-title">Telefono</span>
+      <div class="phone-row"><span class="phone-num">${esc(b.telefono)}</span>
+        <a class="btn sm" href="tel:${esc(b.telefono.replace(/\s/g, ""))}">${ico("phone")}Chiama</a>
+        ${wa ? `<a class="btn sm" href="https://wa.me/${wa}" target="_blank" rel="noopener">${ico("chat")}WhatsApp</a>` : ""}
+        <button class="btn sm" data-act="copy" aria-label="Copia numero">${ico("copy")}</button>
+      </div></div>` : "";
+  const notes = b.note ? `<div class="block"><span class="block-title">Note</span><div class="note-box">${esc(b.note)}</div></div>` : "";
+  const actions = S.editor ? `
+    <div class="btn-row">
+      <button class="btn primary" data-act="edit">${ico("edit")}Modifica</button>
+      ${S.mode !== "demo" ? `<button class="btn" data-act="ics">${ico("cal")}Nel mio calendario</button>` : ""}
+      <button class="btn danger" data-act="del">${ico("trash")}Elimina</button>
+    </div>
+    <div id="confirmBox"></div>` : (S.mode !== "demo" ? `<button class="btn" data-act="ics">${ico("cal")}Aggiungi al mio calendario</button>` : "");
+  const by = b.aggiornatoDa ? `Ultima modifica di ${esc(b.aggiornatoDa)}` : b.creatoDa && b.creatoDa !== "esempio" ? `Inserita da ${esc(b.creatoDa)}` : "";
+  openSheet("detail", `
+    ${head(esc(nomeDi(b)), isPriv(b) ? "" : `<span class="chip ${f.cls}">${f.label}</span>`)}
+    ${isPriv(b) ? `<div class="facts">
+      <div class="fact"><span class="k">Dal</span><span class="v">${long(b.arrivo)}</span></div>
+      <div class="fact"><span class="k">Al</span><span class="v">${long(b.partenza)}</span></div>
+      <div class="fact wide"><span class="k">Durata</span><span class="v tnum">${pl(b.notti, "notte", "notti")}</span></div>
+    </div>` : `<div class="facts">
+      <div class="fact"><span class="k">Arrivo</span><span class="v">${long(b.arrivo)}</span><span class="s">check-in dalle ${CONFIG.orarioCheckin}</span></div>
+      <div class="fact"><span class="k">Partenza</span><span class="v">${long(b.partenza)}</span><span class="s">check-out entro le ${CONFIG.orarioCheckout}</span></div>
+      <div class="fact"><span class="k">Durata</span><span class="v tnum">${pl(b.notti, "notte", "notti")}</span></div>
+      <div class="fact"><span class="k">Ospiti</span><span class="v">${ospitiTxt(b)}</span></div>
+      <div class="fact wide tax"><span class="k">Imposta di soggiorno</span><span class="v tnum">${eur(tx.tot)}</span><span class="s">${impostaCalcolo(b)}</span></div>
+    </div>`}
+    ${phone}${notes}${actions}
+    ${by ? `<div class="meta-line">${by}</div>` : ""}`, b.id);
+  const body = $("#sheetBody");
+  body.querySelector('[data-act="edit"]')?.addEventListener("click", () => openForm(b));
+  body.querySelector('[data-act="ics"]')?.addEventListener("click", () => downloadIcs(b));
+  body.querySelector('[data-act="copy"]')?.addEventListener("click", async () => {
+    try { await navigator.clipboard.writeText(b.telefono); toast("Numero copiato"); }
+    catch { const r = document.createRange(); r.selectNodeContents(body.querySelector(".phone-num")); getSelection().removeAllRanges(); getSelection().addRange(r); toast("Numero selezionato: copialo dal menu"); }
+  });
+  body.querySelector('[data-act="del"]')?.addEventListener("click", () => {
+    $("#confirmBox").innerHTML = `<div class="confirm"><span>${isPriv(b) ? "Eliminare questa occupazione privata?" : `Eliminare la prenotazione di <b>${esc(b.nome)}</b>?`} Sparirà per tutti.</span><div class="btn-row"><button class="btn" data-act="no">Annulla</button><button class="btn danger-solid" data-act="yes">${ico("trash")}Elimina</button></div></div>`;
+    $("#confirmBox [data-act=no]").addEventListener("click", () => { $("#confirmBox").innerHTML = ""; });
+    $("#confirmBox [data-act=yes]").addEventListener("click", async () => {
+      try { await S.store.remove(b.id); closeSheet(); toast("Prenotazione eliminata"); }
+      catch (e) { toast(errMsg(e)); }
+    });
+  });
+}
+
+/* ---------- Modulo nuova / modifica ---------- */
+function openForm(b, arrivo) {
+  const v = b ? { ...b } : { provenienza: "airbnb", nome: "", telefono: "", arrivo: arrivo || todayISO(), notti: 2, adulti: 2, bambini: 0, note: "" };
+  if (isPriv(v)) Object.assign(v, { nome: "", telefono: "", adulti: 2, bambini: 0 });
+  const radios = Object.entries(FONTI).map(([k, f]) => `<input type="radio" name="fProv" id="fProv-${k}" value="${k}"${v.provenienza === k ? " checked" : ""}><label for="fProv-${k}" class="l-${k}">${f.label}</label>`).join("");
+  const stepper = (id, val, min, max, lbl) => `<div class="field"><span class="lbl" id="${id}-l">${lbl}</span><div class="stepper" data-id="${id}" data-min="${min}" data-max="${max}" role="group" aria-labelledby="${id}-l"><button type="button" data-step="-1" aria-label="Diminuisci">−</button><output id="${id}">${val}</output><button type="button" data-step="1" aria-label="Aumenta">+</button></div></div>`;
+  openSheet("form", `
+    ${head(b ? "Modifica prenotazione" : "Nuova prenotazione")}
+    <form class="form" id="bForm" novalidate>
+      <div class="field"><span class="lbl">Provenienza</span><div class="src-pick">${radios}</div></div>
+      <div class="field" data-guest id="fNomeF"><label for="fNome">Nome ospite</label><input class="input" id="fNome" autocomplete="off" maxlength="80" value="${esc(v.nome)}" placeholder="Es. Mario Rossi"><span class="err-msg" hidden>Scrivi il nome dell'ospite.</span></div>
+      <div class="field" data-guest><label for="fTel">Telefono</label><input class="input" id="fTel" type="tel" inputmode="tel" maxlength="30" value="${esc(v.telefono)}" placeholder="Es. +39 333 123 4567"></div>
+      <div class="row2">
+        <div class="field" id="fArrF"><label for="fArr" id="fArrL">Arrivo</label><input class="input" id="fArr" type="date" value="${esc(v.arrivo)}"><span class="err-msg" hidden>Scegli la data.</span></div>
+        ${stepper("fNotti", v.notti, 1, 60, "Notti")}
+      </div>
+      <p class="hint-line" id="fDep"></p>
+      <div class="row2" data-guest>
+        ${stepper("fAd", v.adulti, 1, 20, "Adulti (14+ anni)")}
+        ${stepper("fBi", v.bambini, 0, 20, "Bambini (sotto 14)")}
+      </div>
+      <div class="tax-line" data-guest id="fTax"></div>
+      <div class="field"><label for="fNote">Note</label><textarea class="input" id="fNote" maxlength="2000" placeholder="Orario di arrivo, richieste, caparra…">${esc(v.note)}</textarea></div>
+      <div id="fWarn"></div>
+      <button class="btn primary" type="submit" id="fSave">${b ? "Salva modifiche" : "Aggiungi prenotazione"}</button>
+    </form>`, b ? b.id : "");
+  const form = $("#bForm");
+  const num = (id) => Number($("#" + id).textContent);
+  const priv = () => form.querySelector('input[name="fProv"]:checked')?.value === "privata";
+  const sync = () => {
+    const p = priv();
+    form.querySelectorAll("[data-guest]").forEach((el) => { el.hidden = p; });
+    $("#fArrL").textContent = p ? "Dal" : "Arrivo";
+    form.querySelectorAll(".stepper").forEach((s) => {
+      const val = num(s.dataset.id);
+      s.querySelector('[data-step="-1"]').disabled = val <= Number(s.dataset.min);
+      s.querySelector('[data-step="1"]').disabled = val >= Number(s.dataset.max);
+    });
+    const tb = { adulti: num("fAd"), notti: num("fNotti"), tariffaImposta: v.tariffaImposta };
+    $("#fTax").innerHTML = `<span class="t"><b>Imposta di soggiorno</b><span>${impostaCalcolo(tb)}</span></span><span class="v">${eur(imposta(tb).tot)}</span>`;
+    const arr = $("#fArr").value;
+    if (!arr) { $("#fDep").innerHTML = ""; $("#fWarn").innerHTML = ""; return []; }
+    const dep = addDays(arr, num("fNotti"));
+    $("#fDep").innerHTML = p ? `Torna libera: <b>${long(dep)}</b>` : `Partenza: <b>${long(dep)}</b>`;
+    const clash = S.bookings.filter((o) => o.id !== v.id && arr < o.partenza && o.arrivo < dep);
+    $("#fWarn").innerHTML = clash.length ? `<div class="warn">${ico("alert")}<span>Queste date si sovrappongono a ${clash.map((o) => `<b>${esc(nomeDi(o))}</b> (${short(o.arrivo)} → ${short(o.partenza)})`).join(", ")}.</span></div>` : "";
+    $("#fSave").textContent = clash.length ? "Salva comunque" : (b ? "Salva modifiche" : p ? "Segna come occupata" : "Aggiungi prenotazione");
+    $("#fNote").placeholder = p ? "Facoltative" : "Orario di arrivo, richieste, caparra…";
+    return clash;
+  };
+  form.addEventListener("click", (e) => {
+    const btn = e.target.closest("[data-step]"); if (!btn) return;
+    const s = btn.closest(".stepper"), out = $("#" + s.dataset.id);
+    out.textContent = Math.min(Number(s.dataset.max), Math.max(Number(s.dataset.min), Number(out.textContent) + Number(btn.dataset.step)));
+    sync();
+  });
+  form.querySelectorAll('input[name="fProv"]').forEach((r) => r.addEventListener("change", sync));
+  $("#fArr").addEventListener("change", sync);
+  $("#fArr").addEventListener("input", sync);
+  sync();
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const p = priv();
+    const nome = p ? "Occupata privata" : $("#fNome").value.trim(), arr = $("#fArr").value;
+    $("#fNomeF").classList.toggle("err", !nome); $("#fNomeF .err-msg").hidden = !!nome;
+    $("#fArrF").classList.toggle("err", !arr); $("#fArrF .err-msg").hidden = !!arr;
+    if (!nome) { $("#fNome").focus(); return; }
+    if (!arr) return;
+    const notti = num("fNotti");
+    const data = {
+      ...(b || {}),
+      provenienza: form.querySelector('input[name="fProv"]:checked')?.value || "privata",
+      nome, telefono: p ? "" : $("#fTel").value.trim(), arrivo: arr, notti, partenza: addDays(arr, notti),
+      adulti: p ? 0 : num("fAd"), bambini: p ? 0 : num("fBi"), note: $("#fNote").value.trim(),
+      tariffaImposta: typeof v.tariffaImposta === "number" ? v.tariffaImposta : CONFIG.impostaSoggiorno.tariffa
+    };
+    data.impostaSoggiorno = imposta(data).tot;
+    $("#fSave").disabled = true;
+    try {
+      await S.store.save(data);
+      closeSheet(); goTo(arr);
+      toast(b ? "Modifiche salvate" : p ? "Date occupate salvate" : "Prenotazione aggiunta");
+    } catch (x) { toast(errMsg(x)); $("#fSave").disabled = false; }
+  });
+  if (!b && !priv()) setTimeout(() => $("#fNome")?.focus({ preventScroll: true }), 60);
+}
+
+function errMsg(e) {
+  if (e && e.code === "permission-denied") return "Il tuo account non ha i permessi per modificare";
+  if (e && e.code === "unavailable") return "Sei offline: la modifica partirà appena torna la rete";
+  return "Salvataggio non riuscito. Riprova.";
+}
+
+/* ---------- Esporta nel calendario del telefono (.ics con promemoria il giorno prima) ---------- */
+function downloadIcs(b) {
+  const e = (s) => String(s || "").replace(/\\/g, "\\\\").replace(/;/g, "\\;").replace(/,/g, "\\,").replace(/\r?\n/g, "\\n");
+  const stamp = new Date().toISOString().replace(/[-:]/g, "").replace(/\.\d+/, "");
+  const desc = (isPriv(b) ? [b.note] : [ospitiTxt(b), "Imposta di soggiorno: " + eur(imposta(b).tot), b.telefono ? "Tel. " + b.telefono : "", b.note]).filter(Boolean).join("\n");
+  const ics = [
+    "BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//Casa Vacanze//Prenotazioni//IT", "CALSCALE:GREGORIAN",
+    "BEGIN:VEVENT", `UID:${b.id}@casa-vacanze`, `DTSTAMP:${stamp}`,
+    `DTSTART;VALUE=DATE:${b.arrivo.replace(/-/g, "")}`, `DTEND;VALUE=DATE:${b.partenza.replace(/-/g, "")}`,
+    `SUMMARY:${e(b.nome + " – " + CONFIG.nomeCasa)}`, `DESCRIPTION:${e(desc)}`,
+    "BEGIN:VALARM", "ACTION:DISPLAY", `DESCRIPTION:${e(isPriv(b) ? "Da domani occupata privata" : "Domani arriva " + b.nome)}`, "TRIGGER:-PT15H", "END:VALARM",
+    "END:VEVENT", "END:VCALENDAR"
+  ].join("\r\n");
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(new Blob([ics], { type: "text/calendar" }));
+  a.download = `prenotazione-${b.arrivo}.ics`;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 4000);
+}
+
+/* ---------- Impostazioni e notifiche ---------- */
+const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
+const isStandalone = matchMedia("(display-mode: standalone)").matches || navigator.standalone === true;
+const notifKey = "casa-vacanze-push-token";
+const getTok = () => { try { return localStorage.getItem(notifKey); } catch { return null; } };
+const setTok = (t) => { try { t ? localStorage.setItem(notifKey, t) : localStorage.removeItem(notifKey); } catch {} };
+
+function openSettings() {
+  if (S.mode === "demo") {
+    openSheet("settings", `${head("Impostazioni")}
+      <div>
+        <div class="set-row"><div class="t"><b>Modalità demo</b><span>Le prenotazioni restano solo su questo dispositivo. Per condividerle in tempo reale e ricevere le notifiche, collega Firebase seguendo la guida LEGGIMI.</span></div></div>
+        <div class="set-row"><div class="t"><b>Dati di esempio</b><span>Riporta il calendario alle prenotazioni di prova.</span></div><button class="btn sm" id="sReset">Ripristina</button></div>
+      </div>`);
+    $("#sReset").addEventListener("click", () => { S.store.reset(); closeSheet(); toast("Esempi ripristinati"); });
+    return;
+  }
+  const on = Boolean(getTok()) && typeof Notification !== "undefined" && Notification.permission === "granted";
+  let notifHint = "Ricevi un avviso il giorno prima di ogni arrivo.";
+  if (isIOS && !isStandalone) notifHint = "Su iPhone prima aggiungi l'app alla schermata Home: Condividi → «Aggiungi alla schermata Home», poi aprila da lì.";
+  else if (typeof Notification !== "undefined" && Notification.permission === "denied") notifHint = "Le notifiche sono bloccate: riattivale dalle impostazioni del browser per questo sito.";
+  openSheet("settings", `${head("Account")}
+    <div>
+      <div class="set-row"><div class="t"><b>${esc(S.user.email)}</b><span>${S.editor ? "Può aggiungere e modificare prenotazioni" : "Sola lettura"}</span></div></div>
+      <div class="set-row"><div class="t"><b>Notifiche arrivi</b><span id="nHint">${notifHint}</span></div><button class="btn sm${on ? "" : " primary"}" id="sNotif">${on ? "Disattiva" : "Attiva"}</button></div>
+      <div class="set-row"><div class="t"><b>Esci</b><span>Dovrai inserire di nuovo email e password.</span></div><button class="btn sm danger" id="sOut">${ico("out")}Esci</button></div>
+    </div>`);
+  $("#sNotif").addEventListener("click", () => (on ? disableNotif() : enableNotif()));
+  $("#sOut").addEventListener("click", async () => { closeSheet(); await S.A.signOut(S.auth); });
+}
+
+async function enableNotif() {
+  const btn = $("#sNotif"); btn.disabled = true; btn.textContent = "Attivo…";
+  try {
+    if (!("serviceWorker" in navigator) || typeof Notification === "undefined") throw new Error("unsupported");
+    if (!CONFIG.vapidKey) throw new Error("novapid");
+    const M = await import(FB + "firebase-messaging.js");
+    if (!(await M.isSupported())) throw new Error("unsupported");
+    const perm = await Notification.requestPermission();
+    if (perm !== "granted") throw new Error("denied");
+    const reg = await navigator.serviceWorker.ready;
+    const token = await M.getToken(M.getMessaging(S.app), { vapidKey: CONFIG.vapidKey, serviceWorkerRegistration: reg });
+    await S.FS.setDoc(S.FS.doc(S.db, "dispositivi", token), { uid: S.user.uid, email: S.user.email, dispositivo: navigator.userAgent.slice(0, 140), aggiornato: S.FS.serverTimestamp() });
+    setTok(token);
+    toast("Notifiche attivate"); openSettings();
+  } catch (e) {
+    console.warn(e);
+    const msg = { unsupported: isIOS && !isStandalone ? "Aggiungi prima l'app alla schermata Home" : "Questo browser non supporta le notifiche", denied: "Permesso negato: riattivalo dalle impostazioni del browser", novapid: "Manca la chiave vapidKey nella configurazione" }[e.message] || "Attivazione non riuscita";
+    toast(msg); btn.disabled = false; btn.textContent = "Attiva";
+  }
+}
+
+async function disableNotif() {
+  const token = getTok();
+  try {
+    const M = await import(FB + "firebase-messaging.js");
+    await M.deleteToken(M.getMessaging(S.app)).catch(() => {});
+    if (token) await S.FS.deleteDoc(S.FS.doc(S.db, "dispositivi", token)).catch(() => {});
+  } finally { setTok(null); toast("Notifiche disattivate"); openSettings(); }
+}
+
+/* ---------- Avvisi ---------- */
+let toastT;
+function toast(msg) {
+  const t = $("#toast"); t.textContent = msg; t.classList.add("show");
+  clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove("show"), 2600);
+}
+
+// Aggiorna "oggi" se l'app resta aperta oltre la mezzanotte
+let lastDay = todayISO();
+setInterval(() => { const t = todayISO(); if (t !== lastDay) { lastDay = t; if (!$("#app").hidden) renderAll(); } }, 60000);
+
+boot();
+</script>
+
+</html>

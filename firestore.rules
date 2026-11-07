@@ -1,0 +1,42 @@
+rules_version = '2';
+// Regole di sicurezza: incollale in Firebase > Firestore Database > Regole > Pubblica.
+// Scrivi le email in minuscolo. Chi è negli "editori" può anche vedere.
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Chi può SOLO VEDERE il calendario
+    function lettori() { return ['geremusolino@gmail.com', 'gioele.musolino.04@gmail.com']; }
+
+    // Chi può AGGIUNGERE, MODIFICARE ed ELIMINARE prenotazioni (uguale a CONFIG.editori nell'app)
+    function editori() { return ['stefaninomusolino@gmail.com', 'seforamusolino@gmail.com']; }
+
+    function email() { return request.auth.token.email.lower(); }
+    function puoLeggere() { return request.auth != null && (email() in lettori() || email() in editori()); }
+    function puoScrivere() { return request.auth != null && email() in editori(); }
+
+    function valida(d) {
+      return d.nome is string && d.nome.size() > 0 && d.nome.size() <= 80
+        && d.provenienza in ['airbnb', 'booking', 'privata']
+        && d.arrivo is string && d.arrivo.matches('^[0-9]{4}-[0-9]{2}-[0-9]{2}$')
+        && d.partenza is string && d.partenza.matches('^[0-9]{4}-[0-9]{2}-[0-9]{2}$')
+        && d.partenza > d.arrivo
+        && d.notti is int && d.notti >= 1 && d.notti <= 365
+        && d.adulti is int && d.adulti >= 0 && d.adulti <= 30
+        && d.bambini is int && d.bambini >= 0 && d.bambini <= 30
+        && (!('telefono' in d) || (d.telefono is string && d.telefono.size() <= 30))
+        && (!('note' in d) || (d.note is string && d.note.size() <= 2000));
+    }
+
+    match /prenotazioni/{id} {
+      allow read: if puoLeggere();
+      allow create, update: if puoScrivere() && valida(request.resource.data);
+      allow delete: if puoScrivere();
+    }
+
+    // Telefoni registrati per le notifiche: ognuno gestisce solo il proprio
+    match /dispositivi/{token} {
+      allow create, update: if puoLeggere() && request.resource.data.uid == request.auth.uid;
+      allow delete: if request.auth != null && resource.data.uid == request.auth.uid;
+    }
+  }
+}
